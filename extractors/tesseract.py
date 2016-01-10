@@ -36,7 +36,7 @@ def extract_image(path, languages=None):
     sysfd, page_dest = mkstemp()
     page_out = '%s.txt' % page_dest
     try:
-        if languages is not None or not len(languages):
+        if languages is None or not len(languages):
             languages = LANGUAGES.keys()
         languages = [l[:2].lower() for l in languages]
         languages = [LANGUAGES.get(l) for l in languages]
