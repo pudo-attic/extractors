@@ -29,5 +29,5 @@ for page in data['pages']:
 
 ## Configuration
 
-The binaries to be used can be configured using the following environment variables: ``TESSERACT_BIN``, ``SOFFICE_BIN``, ``PDFTOPPM_BIN``.
+The binaries to be used can be configured using the following environment variables: ``TESSERACT_BIN``, ``SOFFICE_BIN``, ``PDFTOPPM_BIN`` and ``CONVERT_BIN``.
 
