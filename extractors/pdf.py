@@ -53,8 +53,3 @@ def extract_pdf(path, languages=None):
         for page in extract_image_pdf(path, languages=languages):
             data['pages'].append(page)
     return data
-
-
-# convert in.png -gravity center -page A4 out.pdf
-def image_to_pdf(path):
-    pass
