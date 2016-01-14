@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='extractors',
-    version='0.1.2',
+    version='0.2.0',
     description="Wrapper script for data extractors.",
     long_description="",
     classifiers=[
@@ -30,6 +30,8 @@ setup(
     install_requires=[
         'pdfminer==20140328',
         'chardet>=2.3.0',
+        'tesserwrap',
+        'PIL',
         'six'
     ]
 )
