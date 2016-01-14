@@ -31,7 +31,7 @@ setup(
         'pdfminer==20140328',
         'chardet>=2.3.0',
         'tesserwrap',
-        'PIL',
+        'Pillow',
         'six'
     ]
 )
