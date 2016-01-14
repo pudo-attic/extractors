@@ -36,7 +36,7 @@ def _convert_page(layout, languages):
                      if t is not None and len(t)])
 
     # TODO: invent a smarter way to decide whether to do OCR.
-    if len(text) > 3:
+    if len(text.strip()) > 3:
         return text
 
     for img_obj in _find_objects(layout._objs, LTImage):
