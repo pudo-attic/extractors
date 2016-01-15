@@ -44,6 +44,8 @@ The following packages are required: ``tesseract-ocr``, ``tesseract-ocr-osd``, `
 
 **Important:** for OCR to work, the ``TESSDATA_PREFIX`` environment variable needs to be set and point at the directory containing ``tessdata/`` (i.e. the ``tesseract`` training files).
 
+If the environment variable ``EXTRACTORS_CACHE_DIR`` is set, content-addressed caches of all converted image files will be stored there to accelerate repeated operations.
+
 ### Document to PDF conversion
 
 The following packages are required: ``libreoffice``, ``default-jdk``.
