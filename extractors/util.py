@@ -41,5 +41,5 @@ def text_fragments(frags):
         if len(frag):
             text.append(frag)
 
-    text = '\n'.join(frag)
+    text = '\n'.join(text)
     return text.strip()
