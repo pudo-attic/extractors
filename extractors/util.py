@@ -30,3 +30,16 @@ def safe_text(text):
     except Exception as ex:
         log.exception(ex)
         return
+
+
+def text_fragments(frags):
+    text = []
+    for frag in frags:
+        if frag is None:
+            continue
+        frag = frag.strip()
+        if len(frag):
+            text.append(frag)
+
+    text = '\n'.join(frag)
+    return text.strip()

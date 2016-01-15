@@ -8,7 +8,7 @@ from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfdocument import PDFDocument
 
-from extractors.util import safe_text
+from extractors.util import safe_text, text_fragments
 from extractors.tesseract import extract_image_data
 
 
@@ -32,11 +32,9 @@ def _convert_page(layout, languages):
     for text_obj in _find_objects(layout._objs, (LTTextBox, LTTextLine)):
         text_content.append(text_obj.get_text())
 
-    text = ' '.join([t.strip() for t in text_content
-                     if t is not None and len(t)])
-
-    # TODO: invent a smarter way to decide whether to do OCR.
-    if len(text.strip()) > 3:
+    text = text_fragments(text_content)
+    if len(text) > 3:
+        # TODO: invent a smarter way to decide whether to do OCR.
         return text
 
     for img_obj in _find_objects(layout._objs, LTImage):
@@ -50,8 +48,7 @@ def _convert_page(layout, languages):
         except Exception as ex:
             log.debug(ex)
 
-    return ' '.join([t.strip() for t in text_content
-                     if t is not None and len(t)])
+    return text_fragments(text_content)
 
 
 def extract_pdf(path, languages=None):
