@@ -10,10 +10,11 @@ log = logging.getLogger(__name__)
 def guess_encoding(text):
     if isinstance(text, six.text_type):
         return
-    if text is None or len(str(text).strip()):
+    if text is None or not len(str(text).strip()):
         return
-    enc = chardet.detect(text)
-    return enc.get('encoding', 'utf-8')
+    if isinstance(text, six.string_types):
+        enc = chardet.detect(text)
+        return enc.get('encoding', 'utf-8')
 
 
 def safe_text(text):
