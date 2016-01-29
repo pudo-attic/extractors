@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='extractors',
-    version='0.2.4',
+    version='0.3.0',
     description="Wrapper script for data extractors.",
     long_description="",
     classifiers=[

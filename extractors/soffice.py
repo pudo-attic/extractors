@@ -2,7 +2,7 @@ import os
 import logging
 import threading
 import subprocess
-from tempfile import mkdtemp
+from tempfile import mkdtemp, mkstemp
 
 log = logging.getLogger(__name__)
 
@@ -26,5 +26,19 @@ def document_to_pdf(path):
         subprocess.call(args)
         for out_file in os.listdir(work_dir):
             return os.path.join(work_dir, out_file)
+    except Exception as ex:
+        log.exception(ex)
+
+
+def html_to_pdf(path):
+    """ OK, this is weirder. Converting HTML to PDF via WebKit. """
+    fh, out_path = mkstemp(suffix='.pdf')
+    os.close(fh)
+    try:
+        bin_path = os.environ.get('WKHTMLTOPDF_BIN', 'wkhtmltopdf')
+        args = [bin_path, '--disable-javascript', '--no-outline',
+                '--lowquality', '--quiet', path, out_path]
+        subprocess.call(args)
+        return out_path
     except Exception as ex:
         log.exception(ex)
