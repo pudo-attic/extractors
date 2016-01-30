@@ -37,7 +37,7 @@ def html_to_pdf(path):
     try:
         bin_path = os.environ.get('WKHTMLTOPDF_BIN', 'wkhtmltopdf')
         args = [bin_path, '--disable-javascript', '--no-outline',
-                '--lowquality', '--quiet', path, out_path]
+                '--no-images', '--quiet', path, out_path]
         subprocess.call(args)
         return out_path
     except Exception as ex:
