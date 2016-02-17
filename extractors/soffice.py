@@ -15,10 +15,12 @@ def document_to_pdf(path):
     try:
         bin_path = os.environ.get('SOFFICE_BIN', 'soffice')
         instance_path = '"-env:UserInstallation=file://%s"' % instance_dir
-        args = [bin_path, '--convert-to', 'pdf:writer_pdf_Export',
+        args = [bin_path, '--convert-to', 'pdf',
                 '--nofirststartwizard', instance_path,
-                '--outdir', work_dir,
+                '--norestore', '--nologo', '--nodefault', '--nolockcheck',
+                '--invisible', '--outdir', work_dir,
                 '--headless', path]
+        print ' '.join(args)
         subprocess.call(args)
         for out_file in os.listdir(work_dir):
             return os.path.join(work_dir, out_file)
