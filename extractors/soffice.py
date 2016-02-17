@@ -1,24 +1,20 @@
 import os
 import logging
-import threading
+import shutil
 import subprocess
 from tempfile import mkdtemp, mkstemp
 
 log = logging.getLogger(__name__)
 
-instances = threading.local()
-
 
 # other formats: http://opengrok.libreoffice.org/s?n=25&start=0&q=PreferredFilter&sort=relevancy&project=core,
 def document_to_pdf(path):
-    """ OK, this is weird. Converting LibreOffice-supported documents to
-    PDF to then use that extractor. """
+    """Convert LibreOffice-supported documents to PDF."""
     work_dir = mkdtemp()
-    if not hasattr(instances, 'dir'):
-        instances.dir = mkdtemp()
+    instance_dir = mkdtemp()
     try:
         bin_path = os.environ.get('SOFFICE_BIN', 'soffice')
-        instance_path = '"-env:UserInstallation=file://%s"' % instances.dir
+        instance_path = '"-env:UserInstallation=file://%s"' % instance_dir
         args = [bin_path, '--convert-to', 'pdf:writer_pdf_Export',
                 '--nofirststartwizard', instance_path,
                 '--outdir', work_dir,
@@ -28,10 +24,12 @@ def document_to_pdf(path):
             return os.path.join(work_dir, out_file)
     except Exception as ex:
         log.exception(ex)
+    finally:
+        shutil.rmtree(instance_dir)
 
 
 def html_to_pdf(path):
-    """ OK, this is weirder. Converting HTML to PDF via WebKit. """
+    """OK, this is weirder. Converting HTML to PDF via WebKit."""
     fh, out_path = mkstemp(suffix='.pdf')
     os.close(fh)
     try:
