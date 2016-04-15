@@ -20,7 +20,7 @@ def document_to_pdf(path):
                 '--norestore', '--nologo', '--nodefault', '--nolockcheck',
                 '--invisible', '--outdir', work_dir,
                 '--headless', path]
-        print ' '.join(args)
+        log.debug('Converting document: %r', ' '.join(args))
         subprocess.call(args)
         for out_file in os.listdir(work_dir):
             return os.path.join(work_dir, out_file)
