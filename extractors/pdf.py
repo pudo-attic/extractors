@@ -1,3 +1,4 @@
+import os
 import logging
 
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
@@ -9,7 +10,7 @@ from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfdocument import PDFDocument
 
 from extractors.util import safe_text, text_fragments
-from extractors.tesseract import extract_image_data
+from extractors.tesseract import extract_image_data, _extract_image_page
 
 
 log = logging.getLogger(__name__)
@@ -42,7 +43,7 @@ def _convert_page(layout, languages):
             if img_obj.width < OCR_MIN_WIDTH or \
                     img_obj.height < OCR_MIN_HEIGHT:
                 continue
-            data = img_obj.stream.get_rawdata()
+            data = img_obj.stream.get_data()
             img_text = extract_image_data(data, languages=languages)
             text_content.append(img_text)
         except Exception as ex:
@@ -52,9 +53,12 @@ def _convert_page(layout, languages):
 
 
 def extract_pdf(path, languages=None):
-    """ Extract content from a PDF file. This will attempt to use PyPDF2
-    to extract textual content first. If none is found, it'll send the file
-    through OCR. """
+    """
+    Extract content from a PDF file.
+
+    This will attempt to use pdfminer to extract textual content from
+    each page. If none is found, it'll send the images through OCR.
+    """
     with open(path, 'rb') as fh:
         rsrcmgr = PDFResourceManager()
         laparams = LAParams()
@@ -73,35 +77,17 @@ def extract_pdf(path, languages=None):
             log.warning("PDF not extractable: %s", path)
             return result
 
-        for page in PDFPage.create_pages(doc):
-            interpreter.process_page(page)
-            layout = device.get_result()
-            text = _convert_page(layout, languages)
+        for i, page in enumerate(PDFPage.create_pages(doc)):
+            text = None
+            try:
+                interpreter.process_page(page)
+                layout = device.get_result()
+                text = _convert_page(layout, languages)
+            except AttributeError as ae:
+                log.debug("Failed to parse PDF page: %r", ae)
+
+            if text is None or not len(text.strip()):
+                text = _extract_image_page(path, i + 1)
             result['pages'].append(text)
         device.close()
         return result
-
-
-# if __name__ == '__main__':
-#     import os
-#     import thready
-
-#     dir_name = '/Users/fl/Code/extractors/test/pdf'
-
-#     def get_files():
-#         for fn in os.listdir(dir_name):
-#             if fn.endswith('.pdf'):
-#                 yield os.path.join(dir_name, fn)
-
-#     def parse(fn):
-#         print fn
-#         extract_pdf(fn)
-#         # print []
-#         # print [extract_image(fn, force_fork=True)]
-
-#     # import time
-#     # begin = time.time()
-#     # thready.threaded(get_files(), parse)
-#     # print time.time(), time.time() - begin
-#     for pdf_file in get_files():
-#         extract_pdf(pdf_file)
