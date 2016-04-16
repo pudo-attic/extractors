@@ -80,7 +80,7 @@ def extract_pdf(path, languages=None):
 
         if not doc.is_extractable:
             log.warning("PDF not extractable: %s", path)
-            return None
+            return result
 
         for i, page in enumerate(PDFPage.create_pages(doc)):
             text = None
