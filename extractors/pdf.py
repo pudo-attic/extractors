@@ -37,7 +37,6 @@ def _convert_page(layout, languages):
     if len(text) > 3:
         # TODO: invent a smarter way to decide whether to do OCR.
         return text
-    return None
     # for img_obj in _find_objects(layout._objs, LTImage):
     #     try:
     #         if img_obj.width < OCR_MIN_WIDTH or \
@@ -49,6 +48,7 @@ def _convert_page(layout, languages):
     #     except Exception as ex:
     #         log.debug(ex)
     # return text_fragments(text_content)
+    return None
 
 
 def extract_pdf(path, languages=None):
@@ -88,8 +88,8 @@ def extract_pdf(path, languages=None):
                 interpreter.process_page(page)
                 layout = device.get_result()
                 text = _convert_page(layout, languages)
-            except AttributeError as ae:
-                log.debug("Failed to parse PDF page: %r", ae)
+            except Exception as ex:
+                log.warning("Failed to parse PDF page: %r", ex)
 
             if text is None or not len(text.strip()):
                 text = _extract_image_page(path, i + 1)
