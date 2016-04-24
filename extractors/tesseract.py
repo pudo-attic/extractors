@@ -1,8 +1,6 @@
 import os
 import logging
-import threading
 import subprocess
-from tempfile import mkstemp
 try:
     from cStringIO import StringIO
 except:
@@ -17,18 +15,8 @@ from extractors.cache import set_cache, get_cache
 # https://tesserwrap.readthedocs.org/en/latest/#
 # https://pillow.readthedocs.org/en/3.0.x/reference/Image.html
 log = logging.getLogger(__name__)
-tess = threading.local()
 TESSDATA_PREFIX = os.environ.get('TESSDATA_PREFIX')
 PDFTOPPM_BIN = os.environ.get('PDFTOPPM_BIN', 'pdftoppm')
-
-
-def _get_tesseract():
-    # FIXME: not currently loading small language sets.
-    languages = _get_languages(None)
-    if not hasattr(tess, 'instance'):
-        tess.instance = Tesseract(TESSDATA_PREFIX, languages)
-        tess.instance.set_page_seg_mode(PageSegMode.PSM_AUTO_OSD)
-    return tess.instance
 
 
 def extract_image(path, languages=None):
@@ -40,7 +28,7 @@ def extract_image(path, languages=None):
     PNG, TIFF and JPG.
     """
     with open(path, 'rb') as fh:
-        return extract_image_data(fh.read())
+        return extract_image_data(fh.read(), languages=languages)
 
 
 def extract_image_data(data, languages=None):
@@ -58,7 +46,8 @@ def extract_image_data(data, languages=None):
 
     # TODO: play with contrast and sharpening the images.
     try:
-        extractor = _get_tesseract()
+        extractor = Tesseract(TESSDATA_PREFIX, _get_languages(languages))
+        extractor.set_page_seg_mode(PageSegMode.PSM_AUTO_OSD)
         extractor.set_image(img)
         text = extractor.get_utf8_text()
         extractor.clear()
@@ -66,19 +55,15 @@ def extract_image_data(data, languages=None):
         return text
     except Exception as ex:
         log.exception(ex)
-        set_cache(key, '')
+        # set_cache(key, '')
         return ''
 
 
-def _extract_image_page(pdf_file, page):
+def _extract_image_page(pdf_file, page, languages=None):
     # This is a somewhat hacky way of working around some of the formats
     # and compression mechanisms not supported in pdfminer. It will
     # generate an image based on the given page in the PDF and then OCR
     # that.
-    try:
-        args = [PDFTOPPM_BIN, pdf_file, '-singlefile',
-                '-gray', '-f', str(page)]
-        return extract_image_data(subprocess.check_output(args))
-    except Exception as ex:
-        log.warn('Could not extract PDF page: %r', ex)
-        return ''
+    args = [PDFTOPPM_BIN, pdf_file, '-singlefile', '-gray', '-f', str(page)]
+    output = subprocess.check_output(args)
+    return extract_image_data(output, languages=languages)

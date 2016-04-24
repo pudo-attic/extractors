@@ -1,16 +1,16 @@
-import os
 import logging
 
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.converter import PDFPageAggregator
-from pdfminer.layout import LAParams, LTTextBox, LTTextLine, LTFigure, LTImage
+from pdfminer.layout import LAParams, LTTextBox, LTTextLine, LTFigure
+# from pdfminer.layout import LTImage
 
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfparser import PDFParser, PDFSyntaxError
 from pdfminer.pdfdocument import PDFDocument
 
 from extractors.util import safe_text, text_fragments
-from extractors.tesseract import extract_image_data, _extract_image_page
+from extractors.tesseract import _extract_image_page
 
 
 log = logging.getLogger(__name__)
@@ -92,7 +92,7 @@ def extract_pdf(path, languages=None):
                 log.warning("Failed to parse PDF page: %r", ex)
 
             if text is None or not len(text.strip()):
-                text = _extract_image_page(path, i + 1)
+                text = _extract_image_page(path, i + 1, languages)
             result['pages'].append(text)
         device.close()
         return result

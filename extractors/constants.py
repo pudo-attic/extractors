@@ -19,7 +19,7 @@ LANGUAGES = {
 
 def _get_languages(languages):
     if languages is None or not len(languages):
-        languages = LANGUAGES.values()
+        languages = ['en']
 
     supported = []
     for lang in languages:
@@ -30,7 +30,6 @@ def _get_languages(languages):
             if lang not in LANGUAGES:
                 continue
             lang = LANGUAGES.get(lang)
-
         supported.append(lang)
 
     return '+'.join(sorted(supported))
