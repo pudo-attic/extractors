@@ -18,6 +18,8 @@ log = logging.getLogger(__name__)
 TESSDATA_PREFIX = os.environ.get('TESSDATA_PREFIX')
 PDFTOPPM_BIN = os.environ.get('PDFTOPPM_BIN', 'pdftoppm')
 
+INSTANCES = {}
+
 
 def extract_image(path, languages=None):
     """
@@ -46,16 +48,16 @@ def extract_image_data(data, languages=None):
 
     # TODO: play with contrast and sharpening the images.
     try:
-        extractor = Tesseract(TESSDATA_PREFIX, _get_languages(languages))
+        languages = _get_languages(languages)
+        extractor = Tesseract(TESSDATA_PREFIX, lang=languages)
         extractor.set_page_seg_mode(PageSegMode.PSM_AUTO_OSD)
-        extractor.set_image(img)
-        text = extractor.get_utf8_text()
-        extractor.clear()
+        text = extractor.ocr_image(img)
+        log.debug('OCR done: %s, %s characters extracted',
+                  languages, len(text))
         set_cache(key, text)
         return text
     except Exception as ex:
         log.exception(ex)
-        # set_cache(key, '')
         return ''
 
 

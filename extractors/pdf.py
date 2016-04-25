@@ -2,8 +2,7 @@ import logging
 
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.converter import PDFPageAggregator
-from pdfminer.layout import LAParams, LTTextBox, LTTextLine, LTFigure
-# from pdfminer.layout import LTImage
+from pdfminer.layout import LAParams, LTTextBox, LTTextLine, LTFigure, LTImage
 
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfparser import PDFParser, PDFSyntaxError
@@ -28,27 +27,17 @@ def _find_objects(objects, cls):
                 yield obj
 
 
-def _convert_page(layout, languages):
+def _convert_page(layout, path, page_no, languages):
     text_content = []
     for text_obj in _find_objects(layout._objs, (LTTextBox, LTTextLine)):
         text_content.append(text_obj.get_text())
 
     text = text_fragments(text_content)
-    if len(text) > 3:
-        # TODO: invent a smarter way to decide whether to do OCR.
-        return text
-    # for img_obj in _find_objects(layout._objs, LTImage):
-    #     try:
-    #         if img_obj.width < OCR_MIN_WIDTH or \
-    #                 img_obj.height < OCR_MIN_HEIGHT:
-    #             continue
-    #         data = img_obj.stream.get_data()
-    #         img_text = extract_image_data(data, languages=languages)
-    #         text_content.append(img_text)
-    #     except Exception as ex:
-    #         log.debug(ex)
-    # return text_fragments(text_content)
-    return None
+    if len(text) < 2:
+        if len(list(_find_objects(layout._objs, LTImage))):
+            log.debug("Defaulting to OCR: %r, pg. %s", path, page_no)
+            text = _extract_image_page(path, page_no, languages)
+    return text
 
 
 def extract_pdf(path, languages=None):
@@ -68,6 +57,7 @@ def extract_pdf(path, languages=None):
             doc = PDFDocument(parser, '')
         except PDFSyntaxError as pse:
             if 'No /Root object!' in pse.message:
+                log.info("Invalid PDF file: %r", path)
                 return None
             raise
 
@@ -87,12 +77,10 @@ def extract_pdf(path, languages=None):
             try:
                 interpreter.process_page(page)
                 layout = device.get_result()
-                text = _convert_page(layout, languages)
+                text = _convert_page(layout, path, i + 1, languages)
             except Exception as ex:
                 log.warning("Failed to parse PDF page: %r", ex)
-
-            if text is None or not len(text.strip()):
-                text = _extract_image_page(path, i + 1, languages)
+            text = text or ''
             result['pages'].append(text)
         device.close()
         return result
