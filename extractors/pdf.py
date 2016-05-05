@@ -27,16 +27,16 @@ def _find_objects(objects, cls):
                 yield obj
 
 
-def _convert_page(layout, path, page_no, languages):
+def _convert_page(layout, path):
     text_content = []
     for text_obj in _find_objects(layout._objs, (LTTextBox, LTTextLine)):
         text_content.append(text_obj.get_text())
 
     text = text_fragments(text_content)
-    if len(text) < 2:
-        if len(list(_find_objects(layout._objs, LTImage))):
-            log.debug("Defaulting to OCR: %r, pg. %s", path, page_no)
-            text = _extract_image_page(path, page_no, languages)
+    # if len(text) < 2:
+    #     if len(list(_find_objects(layout._objs, LTImage))):
+    #         log.debug("Defaulting to OCR: %r, pg. %s", path, page_no)
+    #         text = _extract_image_page(path, page_no, languages)
     return text
 
 
@@ -77,10 +77,13 @@ def extract_pdf(path, languages=None):
             try:
                 interpreter.process_page(page)
                 layout = device.get_result()
-                text = _convert_page(layout, path, i + 1, languages)
+                text = _convert_page(layout, path)
             except Exception as ex:
                 log.warning("Failed to parse PDF page: %r", ex)
-            text = text or ''
+
+            if text is None or len(text) < 3:
+                log.debug("Defaulting to OCR: %r, pg. %s", path, i + 1)
+                text = _extract_image_page(path, i + 1, languages)
             result['pages'].append(text)
         device.close()
         return result
