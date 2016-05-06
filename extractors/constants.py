@@ -1,20 +1,4 @@
-LANGUAGES = {
-    'en': 'eng',
-    'de': 'deu',
-    'be': 'bel',
-    'az': 'aze',
-    'cs': 'ces',
-    'hr': 'hrv',
-    'hu': 'hun',
-    'ru': 'rus',
-    'pl': 'pol',
-    'sk': 'slk',
-    'sl': 'slv',
-    'sq': 'sqi',
-    'sr': 'srp',
-    'tr': 'tur',
-    'uk': 'ukr'
-}
+import pycountry
 
 
 def _get_languages(languages):
@@ -27,9 +11,11 @@ def _get_languages(languages):
             continue
         lang = lang.lower().strip()
         if len(lang) == 2:
-            if lang not in LANGUAGES:
+            try:
+                c = pycountry.languages.get(iso639_1_code='de')
+                lang = c.iso639_3_code
+            except KeyError:
                 continue
-            lang = LANGUAGES.get(lang)
         supported.append(lang)
 
     return '+'.join(sorted(supported))

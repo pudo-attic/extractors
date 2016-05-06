@@ -30,6 +30,7 @@ setup(
     install_requires=[
         'pdfminer==20140328',
         'chardet>=2.3.0',
+        'pycountry',
         'tesserwrap',
         'Pillow',
         'six'
